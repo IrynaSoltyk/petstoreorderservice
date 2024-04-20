@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +29,12 @@ public class ContainerEnvironment implements Serializable {
 	private String appDate = null;
 	private String year = null;
 	private String author = "Chris Tremblay MSFT";
+
+	@Value("${SB_CONNECTION_STRING}")
+	private String messagingConnectionString;
+
+	@Value("${SB_QUEUE_NAME}")
+	private String messagingQueueName;
 
 	@PostConstruct
 	private void initialize() throws JoranException {
@@ -93,5 +100,13 @@ public class ContainerEnvironment implements Serializable {
 
 	public String getAuthor() {
 		return author;
+	}
+
+	public String getMessagingConnectionString() {
+		return messagingConnectionString;
+	}
+
+	public String getMessagingQueueName() {
+		return messagingQueueName;
 	}
 }

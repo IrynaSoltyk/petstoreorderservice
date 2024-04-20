@@ -1,8 +1,11 @@
 package io.swagger;
 
+import com.azure.messaging.servicebus.ServiceBusClientBuilder;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.chtrembl.petstore.order.model.ContainerEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -30,6 +33,15 @@ public class Swagger2SpringBoot implements CommandLineRunner {
 	@Bean
 	public ContainerEnvironment containerEnvvironment() {
 		return new ContainerEnvironment();
+	}
+
+	@Bean
+	public ServiceBusSenderClient serviceBusSenderClient(ContainerEnvironment containerEnvironment) {
+		return new ServiceBusClientBuilder()
+				.connectionString(containerEnvironment.getMessagingConnectionString())
+				.sender()
+				.queueName(containerEnvironment.getMessagingQueueName())
+				.buildClient();
 	}
 
 	@Override

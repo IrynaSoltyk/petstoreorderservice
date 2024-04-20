@@ -3,9 +3,12 @@ package com.chtrembl.petstore.order.api;
 import com.chtrembl.petstore.order.model.ContainerEnvironment;
 import com.chtrembl.petstore.order.model.Order;
 import com.chtrembl.petstore.order.model.Product;
+import com.chtrembl.petstore.order.service.MessageSender;
 import com.chtrembl.petstore.order.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
+import reactor.core.publisher.Mono;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +58,9 @@ public class StoreApiController implements StoreApi {
 
 	@Autowired
 	private StoreApiCache storeApiCache;
+
+	@Autowired
+	private MessageSender messageSender;
 
 	@Override
 	public StoreApiCache getBeanToBeAutowired() {
@@ -181,6 +188,7 @@ public class StoreApiController implements StoreApi {
 
 			orderService.save(order);
 
+
 			try {
 				//Order order = this.storeApiCache.getOrder(body.getId());
 				String orderJSON = new ObjectMapper().writeValueAsString(order);
@@ -215,6 +223,9 @@ public class StoreApiController implements StoreApi {
 
 			//Order order = this.storeApiCache.getOrder(orderId);
 			Order order = orderService.findById(orderId);
+			if (order == null) {
+				order = new Order();
+			}
 			//List<Product> products = order.getProducts();
 
 			if (products != null) {
@@ -238,7 +249,11 @@ public class StoreApiController implements StoreApi {
 			orderService.save(order);
 
 			try {
-				ApiUtil.setResponse(request, "application/json", new ObjectMapper().writeValueAsString(order));
+				String orderJSON = new ObjectMapper().writeValueAsString(order);
+
+				messageSender.send(orderJSON);
+
+				ApiUtil.setResponse(request, "application/json", orderJSON);
 				return new ResponseEntity<>(HttpStatus.OK);
 			} catch (IOException e) {
 				log.error("Couldn't serialize response for content type application/json", e);
