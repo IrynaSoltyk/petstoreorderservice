@@ -44,8 +44,6 @@ public class OrderRepositoryImpl implements OrderRepository {
             CosmosClient client = new CosmosClientBuilder()
                     .endpoint(cosmosUri)
                     .key(cosmosKey)
-                    // BUG 3: Using STRONG consistency level instead of EVENTUAL,
-                    // which will cause performance issues and higher costs
                     .consistencyLevel(ConsistencyLevel.STRONG)
                     .contentResponseOnWriteEnabled(true)
                     .buildClient();
