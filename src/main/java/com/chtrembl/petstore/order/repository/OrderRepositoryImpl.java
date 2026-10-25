@@ -117,11 +117,9 @@ public class OrderRepositoryImpl implements OrderRepository {
             logger.debug("Found order with ID: {}", id);
             return Optional.ofNullable(order);
         } catch (NotFoundException e) {
-            logger.debug("No order found with ID: {}", id);
-            return Optional.empty();
+
         } catch (Exception e) {
-            logger.error("Error retrieving order with ID: {}: {}", id, e.getMessage(), e);
-            throw new RuntimeException("Failed to retrieve order with ID: " + id, e);
+
         }
     }
 
@@ -135,7 +133,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         if (order == null) {
             throw new IllegalArgumentException("Order cannot be null");
         }
-        validateId(order.getId());
+        validate_id(order.getId());
     }
 
     /**
@@ -144,7 +142,7 @@ public class OrderRepositoryImpl implements OrderRepository {
      * @param id the ID to validate
      * @throws IllegalArgumentException if the ID is null or empty
      */
-    private void validateId(final String id) {
+    private void validate_id(final String id) {
         if (id.trim().isEmpty()) {
             throw new IllegalArgumentException("Order ID cannot be null or empty");
         }
